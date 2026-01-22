@@ -1,2 +1,67 @@
 <?php
-echo"register.php";
+if (isset($_SESSION["user_id"])) {
+    header('Location: index.php');
+}
+
+
+if (!empty($_POST['Nutzername'])&&!empty($_POST['email'])&&!empty($_POST['Passwort'])) {
+ include'db.php';
+ $Name = $_POST["Nutzername"];
+ $email = $_POST["email"];
+ $Passwort = $_POST["Passwort"];
+ $hash = hash('sha256', $Passwort);
+
+ $premium = 0;
+ if (isset($_POST['premium'])){
+     $premium = 1;
+ }
+
+ $s = "SELECT COUNT(*) FROM user WHERE email = '".$email."';";
+ $sum = 0;
+ $result = mysqli_query($con, $s);
+
+ while ($row = mysqli_fetch_array($result)){
+     $sum = $sum+$row[0];
+ }
+
+ if($sum > 0){
+     echo "<b>  <span style='color:red'> Nutzer mit dieser E-Mail existiert bereits!  </span> </b>";
+ } else {
+     $sql="INSERT INTO user (name, email, passwort, premium, timestamp) VALUES ('$Name', '$email', '$hash', '$premium', current_timestamp)";
+     mysqli_query($con, $sql) or die ("Fehlgeschlagen! SQL-Error: ".mysqli_error($con));
+     echo "<b>  <span style='color:green'> gesendet  </span> </b>";
+ }
+
+
+
+}
+
+?>
+
+
+<html>
+<head>
+</head>
+<body>
+<div class="container">
+  <h2>Registierung</h2>
+	<form method="POST" action="index.php?content=register" >
+			
+		<div class="form-group">
+			<label for="Nutzername">Nutzername:</label>
+			<input type="text" class="form-control" id="Nutzername" placeholder="Enter Nutzername" name="Nutzername">
+			<label for="email">Email:</label>
+			<input type="text" class="form-control" id="email" placeholder="Enter email" name="email">
+			<label for="Passwort">Password:</label>
+			<input type="password" class="form-control" id="Passwort" placeholder="Enter passwort" name="Passwort">
+            <label for="premium">Ja, ich möchte Premiumnutzer sein:</label>
+            <input type="checkbox" class="form-control" id="premium" value="true" name="premium">
+		</div>
+		<button type="submit" class="btn btn-primary">Registrieren</button>
+		<button type="reset" class="btn btn-danger">Löschen</button>
+	</form>
+	</br>	
+</div>
+   
+</body>
+</html>
